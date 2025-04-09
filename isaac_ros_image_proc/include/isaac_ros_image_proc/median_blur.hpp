@@ -28,11 +28,11 @@ namespace nvidia
         namespace image_proc
         {
 
-            class TestNode : public rclcpp::Node
+            class MediumBlurNode : public rclcpp::Node
             {
             public:
-                explicit TestNode(const rclcpp::NodeOptions &options);
-                virtual ~TestNode();
+                explicit MediumBlurNode(const rclcpp::NodeOptions &options);
+                ~MediumBlurNode() final;
 
             private:
                 void input_callback(const nvidia::isaac_ros::nitros::NitrosImageView &view);
@@ -50,16 +50,6 @@ namespace nvidia
                 // Parameters and parameter listener
                 std::shared_ptr<ParamListener> param_listener_;
                 Params params_;
-
-                // Input Image parameters
-                int input_image_width_;
-                int input_image_height_;
-                int input_image_channels_;
-
-                // Output Image parameters
-                int output_image_width_;
-                int output_image_height_;
-                int output_image_channels_;
 
                 // NVCV Tensors and corresponding GPU buffer (strided)
                 nvcv::TensorDataStridedCuda::Buffer input_image_buffer_;
