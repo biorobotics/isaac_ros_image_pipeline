@@ -1,9 +1,0 @@
-test_node:
-  img_width:
-    type: int
-    default_value: 2448
-    description: "The default width of the image."
-  img_height:
-    type: int
-    default_value: 1840
-    description: " The default height of the image"

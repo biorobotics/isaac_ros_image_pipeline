@@ -1,0 +1,18 @@
+median_blur_node:
+  batch_size_:
+    type: int
+    default_value: 1
+    description: "The default batch size of images"
+  kernelWidth:
+    type: int
+    default_value: 3
+    description: "Kernel height for blur operation. Needs to be odd"
+  kernelHeight:
+    type: int
+    default_value: 3
+    description: "Kernel height for blur operation. Needs to be odd"
+  maxVarShapeBatchSize:
+    type: int
+    default_value: 1
+    description: "maximum batch size for var shape operator"
+  

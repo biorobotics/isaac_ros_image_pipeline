@@ -35,26 +35,12 @@ find_package(vpi REQUIRED)
 #enable_language(CUDA)
 #
 #
-# Create the library for test node
+# Create the library for use in components
 #
 generate_parameter_library(
-  test_node_parameters # cmake target name for the parameter library
-  config/test_node_parameters.yaml # path to input yaml file
+  tnode_parameters # cmake target name for the parameter library
+  config/parameters.yaml # path to input yaml file
 )
-ament_auto_add_library(test_node SHARED src/test_node.cpp)
-target_link_libraries(test_node cvcuda nvcv_types fmt::fmt test_node_parameters)
-rclcpp_components_register_nodes(test_node "nvidia::isaac_ros::image_proc::TestNode")
-set(node_plugins "${node_plugins}nvidia::isaac_ros::image_proc::TestNode;$<TARGET_FILE:test_node>\n")
-set_target_properties(test_node PROPERTIES
-  BUILD_WITH_INSTALL_RPATH TRUE
-  BUILD_RPATH_USE_ORIGIN TRUE
-  INSTALL_RPATH_USE_LINK_PATH TRUE)
-install(TARGETS test_node test_node_parameters
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin
-)
-
 
 # alpha blend node
 ament_auto_add_library(alpha_blend_node SHARED src/alpha_blend_node.cpp src/alpha_blend.cu.cpp)
@@ -228,11 +214,6 @@ if(BUILD_TESTING)
   add_launch_test(test/isaac_ros_wide_fov_test.py)
 endif()
 
-# Install launch files.
-install(DIRECTORY
-  launch
-  DESTINATION share/${PROJECT_NAME}/
-)
 
 # Embed versioning information into installed files
 ament_index_get_resource(ISAAC_ROS_COMMON_CMAKE_PATH isaac_ros_common_cmake_path isaac_ros_common)
