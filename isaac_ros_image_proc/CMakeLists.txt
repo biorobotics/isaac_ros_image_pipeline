@@ -42,6 +42,21 @@ generate_parameter_library(
   config/parameters.yaml # path to input yaml file
 )
 
+# Median blur node
+ament_auto_add_library(median_blur_node SHARED src/median_blur.cpp)
+rclcpp_components_register_nodes(median_blur_node "nvidia::isaac_ros::image_proc::MedianBlurNode")
+set(node_plugins "${node_plugins}nvidia::isaac_ros::image_proc::MedianBlurNode;$<TARGET_FILE:median_blur_node>\n")
+target_link_libraries(median_blur_node cvcuda nvcv_types)
+set_target_properties(median_blur_node PROPERTIES
+  BUILD_WITH_INSTALL_RPATH TRUE
+  BUILD_RPATH_USE_ORIGIN TRUE
+  INSTALL_RPATH_USE_LINK_PATH TRUE)
+install(TARGETS median_blur_node
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+)
+
 # alpha blend node
 ament_auto_add_library(alpha_blend_node SHARED src/alpha_blend_node.cpp src/alpha_blend.cu.cpp)
 rclcpp_components_register_nodes(alpha_blend_node "nvidia::isaac_ros::image_proc::AlphaBlendNode")
