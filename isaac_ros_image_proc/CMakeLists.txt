@@ -42,6 +42,21 @@ generate_parameter_library(
   config/parameters.yaml # path to input yaml file
 )
 
+# cvt color node
+ament_auto_add_library(cvt_color_node SHARED src/cvt_color.cpp)
+rclcpp_components_register_nodes(cvt_color_node "nvidia::isaac_ros::image_proc::CvtColorNode")
+set(node_plugins "${node_plugins}nvidia::isaac_ros::image_proc::CvtColorNode;$<TARGET_FILE:cvt_color_node>\n")
+target_link_libraries(cvt_color_node cvcuda nvcv_types)
+set_target_properties(cvt_color_node PROPERTIES
+  BUILD_WITH_INSTALL_RPATH TRUE
+  BUILD_RPATH_USE_ORIGIN TRUE
+  INSTALL_RPATH_USE_LINK_PATH TRUE)
+install(TARGETS cvt_color_node
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+)
+
 # alpha blend node
 ament_auto_add_library(alpha_blend_node SHARED src/alpha_blend_node.cpp src/alpha_blend.cu.cpp)
 rclcpp_components_register_nodes(alpha_blend_node "nvidia::isaac_ros::image_proc::AlphaBlendNode")
