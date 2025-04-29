@@ -23,8 +23,6 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 find_package(ament_cmake_auto REQUIRED)
-find_package(fmt REQUIRED)
-find_package(generate_parameter_library REQUIRED)
 ament_auto_find_build_dependencies()
 
 # Find VPI dependency

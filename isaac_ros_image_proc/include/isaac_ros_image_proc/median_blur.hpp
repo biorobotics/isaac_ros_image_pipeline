@@ -41,17 +41,11 @@ namespace nvidia
                 // Parameters and parameter listener
                 std::shared_ptr<median_blur_node::ParamListener> param_listener_;
 
-                //
-                int input_image_width_;
-                int input_image_height_;
-                int input_image_channels_;
-                int output_image_width_;
-                int output_image_height_;
-                int output_image_channels_;
+                // Varaibles for parameters
                 uint32_t batch_size_;
-                int32_t kernelWidth;
-                int32_t kernelHeight;
-                static constexpr int maxVarShapeBatchSize = 1;
+                int32_t kernel_width_;
+                int32_t kernel_height_;
+                static constexpr int max_var_shape_batch_size_ = 1;
 
                 // NVCV Tensors and corresponding GPU buffer (strided)
                 nvcv::TensorDataStridedCuda::Buffer input_image_buffer_;
@@ -61,7 +55,7 @@ namespace nvidia
                 nvcv::Tensor output_image_tensor_;
 
                 // Operator
-                cvcuda::MedianBlur medianBlurOp_;
+                cvcuda::MedianBlur median_blur_op_;
 
                 // CUDA stream
                 cudaStream_t stream_;

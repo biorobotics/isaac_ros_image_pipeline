@@ -17,14 +17,16 @@ namespace nvidia
         {
             MedianBlurNode::MedianBlurNode(const rclcpp::NodeOptions &options)
                 : Node("median_blur_node", options),
-                  medianBlurOp_(maxVarShapeBatchSize) // Initialize MedianBlur operator using the constant
+                  median_blur_op_(max_var_shape_batch_size_) // Initialize MedianBlur operator using the constant
             {
+                // Initialize params from generate parameter library
                 param_listener_ = std::make_shared<median_blur_node::ParamListener>(this->get_node_parameters_interface());
                 auto params_ = param_listener_->get_params();
 
-                int test = params_.batch_size_;
-                RCLCPP_ERROR(this->get_logger(), "************printing params************ %d",test);
-                exit(0);
+                // Set image and processing parameters.
+                batch_size_ = params_.batch_size_;
+                kernel_width_ = params_.kernel_width_;
+                kernel_height_ = params_.kernel_height_;
 
                 // Create a CUDA stream for kernel execution.
                 cudaError_t streamErr = cudaStreamCreate(&stream_);
@@ -32,36 +34,41 @@ namespace nvidia
                 {
                     RCLCPP_ERROR(this->get_logger(), "Failed to create CUDA stream!");
                     // You might handle this error by aborting construction, throwing an exception, etc.
-                    return;
+                    exit(0);
                 }
+
                 // Create a subscriber
                 nitros_sub_ptr_ = std::make_shared<nvidia::isaac_ros::nitros::ManagedNitrosSubscriber<
                     nvidia::isaac_ros::nitros::NitrosImageView>>(
-                    this, "image_raw",
+                    this, params_.image_sub_topic_,
                     nvidia::isaac_ros::nitros::nitros_image_bgr8_t::supported_type_name,
                     std::bind(&MedianBlurNode::input_callback, this, std::placeholders::_1));
 
                 // Create a publisher
                 nitros_pub_ptr_ = std::make_shared<nvidia::isaac_ros::nitros::ManagedNitrosPublisher<
                     nvidia::isaac_ros::nitros::NitrosImage>>(
-                    this, "blur_image",
+                    this, params_.image_pub_topic_,
                     nvidia::isaac_ros::nitros::nitros_image_bgr8_t::supported_type_name);
+            }
 
-                // Set image and processing parameters.
-                batch_size_ = 1;
-                input_image_channels_ = 3;
-                input_image_width_ = 2448;
-                input_image_height_ = 1840;
-                output_image_channels_ = 3;
-                output_image_width_ = 2448;
-                output_image_height_ = 1840;
-                kernelWidth = 3; // blur kernel size
-                kernelHeight = 3;
+            MedianBlurNode::~MedianBlurNode()
+            {
+            }
+
+            void MedianBlurNode::input_callback(const nvidia::isaac_ros::nitros::NitrosImageView &view)
+            {
+                int input_image_width_ = view.GetWidth();
+                int input_image_height_ = view.GetHeight();
+                int input_image_channels_ = 3;
+                int output_image_width_ = input_image_width_;
+                int output_image_height_ = input_image_height_;
+                int output_image_channels_ = input_image_channels_;
+                size_t buffer_size_ = view.GetSizeInBytes();
 
                 //
                 // Calculate tensor requirements for the input image.
                 //
-                nvcv::Tensor::Requirements reqs = nvcv::Tensor::CalcRequirements(
+                nvcv::Tensor::Requirements reqs_ = nvcv::Tensor::CalcRequirements(
                     batch_size_,
                     {input_image_width_, input_image_height_},
                     nvcv::FMT_BGR8);
@@ -76,12 +83,12 @@ namespace nvidia
                 if (err != cudaSuccess)
                 {
                     RCLCPP_ERROR(this->get_logger(), "Failed to allocate CUDA memory for input image.");
-                    return;
+                    exit(0);
                 }
 
                 nvcv::TensorDataStridedCuda in_data(
-                    nvcv::TensorShape{reqs.shape, reqs.rank, reqs.layout},
-                    nvcv::DataType{reqs.dtype},
+                    nvcv::TensorShape{reqs_.shape, reqs_.rank, reqs_.layout},
+                    nvcv::DataType{reqs_.dtype},
                     input_image_buffer_);
                 input_image_tensor_ = nvcv::TensorWrapData(in_data);
 
@@ -97,34 +104,26 @@ namespace nvidia
                 if (err != cudaSuccess)
                 {
                     RCLCPP_ERROR(this->get_logger(), "Failed to allocate CUDA memory for output image.");
-                    return;
+                    exit(0);
                 }
 
                 nvcv::TensorDataStridedCuda blur_data(
-                    nvcv::TensorShape{reqs.shape, reqs.rank, reqs.layout},
-                    nvcv::DataType{reqs.dtype},
+                    nvcv::TensorShape{reqs_.shape, reqs_.rank, reqs_.layout},
+                    nvcv::DataType{reqs_.dtype},
                     output_image_buffer_);
                 output_image_tensor_ = nvcv::TensorWrapData(blur_data);
-            }
 
-            MedianBlurNode::~MedianBlurNode()
-            {
-            }
-
-            void MedianBlurNode::input_callback(const nvidia::isaac_ros::nitros::NitrosImageView &view)
-            {
                 // Copy the incoming Nitros image GPU data into the input tensor.
-                size_t buffer_size = view.GetSizeInBytes();
-                cudaError_t err = cudaMemcpy(input_image_buffer_.basePtr, view.GetGpuData(), buffer_size, cudaMemcpyDefault);
+                err = cudaMemcpy(input_image_buffer_.basePtr, view.GetGpuData(), buffer_size_, cudaMemcpyDefault);
                 if (err != cudaSuccess)
                 {
                     RCLCPP_ERROR(this->get_logger(), "Failed to copy nitros input image to input image buffer.");
-                    return;
+                    exit(0);
                 }
 
                 // Median blur processing.
-                nvcv::Size2D kSize_(kernelWidth, kernelHeight);
-                medianBlurOp_(stream_, input_image_tensor_, output_image_tensor_, kSize_);
+                nvcv::Size2D kernel_size_(kernel_width_, kernel_height_);
+                median_blur_op_(stream_, input_image_tensor_, output_image_tensor_, kernel_size_);
                 RCLCPP_INFO(this->get_logger(), "Median blur processing...");
 
                 // Prepare a temporary CUDA buffer for publishing the image.
@@ -134,7 +133,7 @@ namespace nvidia
                 if (err != cudaSuccess)
                 {
                     RCLCPP_ERROR(this->get_logger(), "Failed to allocate CUDA memory for publishing blur image.");
-                    return;
+                    exit(0);
                 }
 
                 err = cudaMemcpy(buffer, output_image_buffer_.basePtr, output_image_buffer_size, cudaMemcpyDefault);
@@ -142,7 +141,7 @@ namespace nvidia
                 {
                     RCLCPP_ERROR(this->get_logger(), "Failed to copy crop image buffer to nitros output.");
                     cudaFree(buffer);
-                    return;
+                    exit(0);
                 }
 
                 // Build and publish the Nitros image.
