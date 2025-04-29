@@ -7,6 +7,7 @@
 #include "isaac_ros_nitros_image_type/nitros_image_builder.hpp"
 
 #include <nvcv/Size.hpp>
+#include <iostream>
 
 namespace nvidia
 {
@@ -18,6 +19,13 @@ namespace nvidia
                 : Node("median_blur_node", options),
                   medianBlurOp_(maxVarShapeBatchSize) // Initialize MedianBlur operator using the constant
             {
+                param_listener_ = std::make_shared<median_blur_node::ParamListener>(this->get_node_parameters_interface());
+                auto params_ = param_listener_->get_params();
+
+                int test = params_.batch_size_;
+                RCLCPP_ERROR(this->get_logger(), "************printing params************ %d",test);
+                exit(0);
+
                 // Create a CUDA stream for kernel execution.
                 cudaError_t streamErr = cudaStreamCreate(&stream_);
                 if (streamErr != cudaSuccess)
