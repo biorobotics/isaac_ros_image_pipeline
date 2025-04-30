@@ -23,8 +23,6 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 find_package(ament_cmake_auto REQUIRED)
-find_package(fmt REQUIRED)
-find_package(generate_parameter_library REQUIRED)
 ament_auto_find_build_dependencies()
 
 # Find VPI dependency
@@ -33,29 +31,20 @@ find_package(vpi REQUIRED)
 ## Enable CUDA
 #find_package(CUDAToolkit REQUIRED)
 #enable_language(CUDA)
-#
-#
-# Create the library for use in components
-#
-generate_parameter_library(
-  tnode_parameters # cmake target name for the parameter library
-  config/parameters.yaml # path to input yaml file
-)
 
 # cvt color node
+generate_parameter_library(
+  cvt_color_parameters # cmake target name for the parameter library
+  config/cvt_color_parameters.yaml # path to input yaml file
+)
 ament_auto_add_library(cvt_color_node SHARED src/cvt_color.cpp)
 rclcpp_components_register_nodes(cvt_color_node "nvidia::isaac_ros::image_proc::CvtColorNode")
 set(node_plugins "${node_plugins}nvidia::isaac_ros::image_proc::CvtColorNode;$<TARGET_FILE:cvt_color_node>\n")
-target_link_libraries(cvt_color_node cvcuda nvcv_types)
+target_link_libraries(cvt_color_node cvcuda nvcv_types cvt_color_parameters)
 set_target_properties(cvt_color_node PROPERTIES
   BUILD_WITH_INSTALL_RPATH TRUE
   BUILD_RPATH_USE_ORIGIN TRUE
   INSTALL_RPATH_USE_LINK_PATH TRUE)
-install(TARGETS cvt_color_node
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin
-)
 
 # alpha blend node
 ament_auto_add_library(alpha_blend_node SHARED src/alpha_blend_node.cpp src/alpha_blend.cu.cpp)
