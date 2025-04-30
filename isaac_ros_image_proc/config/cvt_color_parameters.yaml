@@ -9,5 +9,5 @@ cvt_color_node:
     description: "The topic on which the image is subscribed."
   image_pub_topic_:
     type: string
-    default_value: "/blur_image"
+    default_value: "/hsv_image"
     description: "The topic on which the image is subscribed."
