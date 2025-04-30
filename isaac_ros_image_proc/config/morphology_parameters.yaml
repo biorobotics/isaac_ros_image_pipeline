@@ -1,0 +1,22 @@
+morphology_node:
+  batch_size_:
+    type: int
+    default_value: 1
+    description: "The default batch size of images"
+  kernel_width_:
+    type: int
+    default_value: 3
+    description: "Kernel height for blur operation. Needs to be odd"
+  kernel_height_:
+    type: int
+    default_value: 3
+    description: "Kernel height for blur operation. Needs to be odd"
+  image_sub_topic_:
+    type: string
+    default_value: "/image_raw"
+    description: "The topic on which the image is subscribed."
+  image_pub_topic_:
+    type: string
+    default_value: "/morphology_image"
+    description: "The topic on which the image is subscribed."
+  
