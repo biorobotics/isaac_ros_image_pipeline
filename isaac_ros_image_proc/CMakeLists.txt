@@ -33,7 +33,7 @@ find_package(OpenCV REQUIRED)
 #find_package(CUDAToolkit REQUIRED)
 #enable_language(CUDA)
 #
-# Median blur node
+# bag reader node
 generate_parameter_library(
   bag_reader_parameters # cmake target name for the parameter library
   config/bag_reader_parameters.yaml # path to input yaml file
