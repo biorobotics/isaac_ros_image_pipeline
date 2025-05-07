@@ -11,3 +11,7 @@ cvt_color_node:
     type: string
     default_value: "/hsv_image"
     description: "The topic on which the image is subscribed."
+  bframe_rate_display_:
+    type: bool
+    default_value: false
+    description: "If true, logger will log the frame rate of the callback"

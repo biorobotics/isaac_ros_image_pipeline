@@ -42,9 +42,9 @@ namespace nvidia
 
                 // Parameters and parameter listener
                 std::shared_ptr<cvt_color_node::ParamListener> param_listener_;
+                cvt_color_node::Params params_;
 
                 // Variables for parameters
-                // uint32_t batch_size_;
                 NVCVColorConversionCode color_conversion_code_;
 
                 // Operator
