@@ -36,7 +36,7 @@ namespace nvidia
             {
                 // Initialize params from generate parameter library
                 param_listener_ = std::make_shared<median_blur_node::ParamListener>(this->get_node_parameters_interface());
-                auto params_ = param_listener_->get_params();
+                params_ = param_listener_->get_params();
 
                 // Create a subscriber
                 nitros_sub_ptr_ = std::make_shared<nvidia::isaac_ros::nitros::ManagedNitrosSubscriber<
@@ -52,14 +52,16 @@ namespace nvidia
                     nvidia::isaac_ros::nitros::nitros_image_bgr8_t::supported_type_name); // diagnostics config and qos TODO
 
                 CheckCudaErrors(cudaStreamCreate(&stream_), __FILE__, __LINE__);
-
-                // Set image and processing parameters.
-                kernel_width_ = params_.kernel_width_;
-                kernel_height_ = params_.kernel_height_;
             }
 
             void MedianBlurNode::input_callback(const nvidia::isaac_ros::nitros::NitrosImageView &view)
             {
+                // Check if any parameters have changed
+                if (param_listener_->is_old(params_))
+                {
+                    params_ = param_listener_->get_params();
+                }
+
                 // Get the input image data and its properties
                 const uint32_t input_image_width_ = view.GetWidth();
                 const uint32_t input_image_height_ = view.GetHeight();
@@ -78,7 +80,7 @@ namespace nvidia
                 input_image_buffer_.basePtr = const_cast<NVCVByte *>(reinterpret_cast<const NVCVByte *>(view.GetGpuData()));
 
                 nvcv::Tensor::Requirements input_image_reqs_ = nvcv::Tensor::CalcRequirements(
-                    1,
+                    params_.batch_size_,
                     {static_cast<int32_t>(view.GetWidth()), static_cast<int32_t>(view.GetHeight())},
                     nvcv::FMT_BGR8); // write a function to get the NVCV format from the image encoding TODO
 
@@ -91,7 +93,7 @@ namespace nvidia
                 // Allocate the memory buffer for output ourselves rather than letting CV-CUDA allocate it
                 uint8_t *raw_output_image_buffer{nullptr};
                 const size_t output_image_buffer_size_ = output_image_width_ * output_image_height_ * output_image_channels_ * sizeof(uint8_t);
-                CheckCudaErrors(cudaMallocAsync(&raw_output_image_buffer, output_image_buffer_size_, stream_), __FILE__, __LINE__);
+                CheckCudaErrors(cudaMallocAsync(&raw_output_image_buffer, params_.batch_size_ * output_image_buffer_size_, stream_), __FILE__, __LINE__);
 
                 nvcv::TensorDataStridedCuda::Buffer output_image_buffer_;
                 output_image_buffer_.strides[3] = sizeof(uint8_t);
@@ -102,7 +104,7 @@ namespace nvidia
                 output_image_buffer_.basePtr = reinterpret_cast<NVCVByte *>(raw_output_image_buffer);
 
                 nvcv::Tensor::Requirements output_image_reqs_ = nvcv::Tensor::CalcRequirements(
-                    1,
+                    params_.batch_size_,
                     {static_cast<int32_t>(view.GetWidth()), static_cast<int32_t>(view.GetHeight())},
                     nvcv::FMT_BGR8); // write a function to get the NVCV format from the image encoding TODO
 
@@ -113,7 +115,7 @@ namespace nvidia
                 nvcv::Tensor output_image_tensor_{nvcv::TensorWrapData(output_image_data_)};
 
                 // Median blur processing.
-                nvcv::Size2D kernel_size_(kernel_width_, kernel_height_);
+                nvcv::Size2D kernel_size_(static_cast<int32_t>(params_.kernel_width_), static_cast<int32_t>(params_.kernel_height_));
                 median_blur_op_(stream_, input_image_tensor_, output_image_tensor_, kernel_size_);
 
                 CheckCudaErrors(cudaStreamSynchronize(stream_), __FILE__, __LINE__);
@@ -134,22 +136,24 @@ namespace nvidia
 
                 nitros_pub_ptr_->publish(output_image_msg_);
 
-                // calculating frame rate
-                static rclcpp::Time last_time = this->now();
-                rclcpp::Time current_time = this->now();
-                // RCLCPP_INFO(this->get_logger(), "time diff: %f", (current_time - last_time).seconds());
-                // finding average frame rate over 20 frames
-                static int count = 0;
-                static double total_time = 0;
-                total_time += (current_time - last_time).seconds();
-                count++;
-                if (count == 5)
+                if (params_.bframe_rate_display_)
                 {
-                    RCLCPP_INFO(this->get_logger(), "average frame rate: %f", 1 / (total_time / count));
-                    count = 0;
-                    total_time = 0;
+                    // calculating frame rate
+                    static rclcpp::Time last_time = this->now();
+                    rclcpp::Time current_time = this->now();
+                    static int count = 0;
+                    static double total_time = 0;
+                    total_time += (current_time - last_time).seconds();
+                    count++;
+                    if (count == 5)
+                    {
+                        RCLCPP_INFO(this->get_logger(), "average frame rate: %f", 1 / (total_time / count));
+                        count = 0;
+                        total_time = 0;
+                    }
+                    last_time = current_time;
+                    // end of frame rate calculation
                 }
-                last_time = current_time;
             }
 
             MedianBlurNode::~MedianBlurNode()
