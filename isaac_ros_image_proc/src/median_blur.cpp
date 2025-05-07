@@ -90,7 +90,7 @@ namespace nvidia
 
                 // Allocate the memory buffer for output ourselves rather than letting CV-CUDA allocate it
                 uint8_t *raw_output_image_buffer{nullptr};
-                const size_t output_image_buffer_size_ = output_image_width_ * output_image_height_ * output_image_channels_ * sizeof(float);
+                const size_t output_image_buffer_size_ = output_image_width_ * output_image_height_ * output_image_channels_ * sizeof(uint8_t);
                 CheckCudaErrors(cudaMallocAsync(&raw_output_image_buffer, output_image_buffer_size_, stream_), __FILE__, __LINE__);
 
                 nvcv::TensorDataStridedCuda::Buffer output_image_buffer_;
