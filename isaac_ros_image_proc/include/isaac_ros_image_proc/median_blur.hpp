@@ -44,8 +44,8 @@ namespace nvidia
                 std::shared_ptr<median_blur_node::ParamListener> param_listener_;
                 median_blur_node::Params params_;
 
-                // // Varaibles for parameters
-                static constexpr int max_var_shape_batch_size_ = 1;
+                // Varaibles for parameters
+                const int max_var_shape_batch_size_ = 1;
 
                 // Operator
                 cvcuda::MedianBlur median_blur_op_;
