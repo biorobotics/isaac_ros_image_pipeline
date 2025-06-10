@@ -1,8 +1,6 @@
 bag_reader_node:
   bag_filename_:
     type: string
-#     default_value: "/workspaces/isaac_ros-dev/src/rosbag2_1920x1080/rosbag2_2025_05_07-18_48_04_0.db3"
-#     default_value: "/workspaces/isaac_ros-dev/src/rosbag2_1280x720/rosbag2_2025_05_07-18_46_11_0.db3"
     default_value: "/workspaces/isaac_ros-dev/src/rosbag2_2025_02_28-15_52_46/rosbag2_2025_02_28-15_52_46_0.db3"
 #     default_value: "/workspaces/isaac_ros-dev/src/rosbag2_2025_04_29-13_46_01-20250429T174900Z-001/rosbag2_2025_04_29-13_46_01/rosbag2_2025_04_29-13_46_01_0.db3"
     description: "path of bagfile"
@@ -18,11 +16,11 @@ bag_reader_node:
     description: "The topic from bag being read."
   resize_factor:
         type: double
-        default_value: 0.2
+        default_value: 0.5
         description: "Resize the image before im show (opencv)"
   watermark_scale:
         type: double
-        default_value: 0.4
+        default_value: 0.7
         description: "watermark text scale"
   watermark_thickness:
         type: int

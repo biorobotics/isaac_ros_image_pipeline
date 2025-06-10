@@ -14,7 +14,11 @@ def generate_launch_description():
                 ComposableNode(
                     package='isaac_ros_image_proc',
                     plugin='nvidia::isaac_ros::image_proc::BagReaderNode',
-                    name='bag_reader_node'
+                    name='bag_reader_node',
+                    parameters=[
+                        {'bag_topic': '/resized_image',
+                         'pub_image_topic': '/image_raw',
+                         'bag_filename_': '/workspaces/isaac_ros-dev/src/rosbag2_image_raw_1280x720/rosbag2_2025_05_14-12_06_14_0.db3',}]
                     ),
                 ComposableNode(
                     package='isaac_ros_image_proc',
@@ -54,24 +58,25 @@ def generate_launch_description():
                     name='node5',
                     parameters=[
                         {'image_sub_topic_': '/image_out4',
-                         'image_pub_topic_': '/image_out5',}]
+                         'image_pub_topic_': '/image_out5',
+                         'bframe_rate_display_': True,}]
                     ),
-                ComposableNode(
-                    package='isaac_ros_image_proc',
-                    plugin='nvidia::isaac_ros::image_proc::CvtColorNode',
-                    name='node6',
-                    parameters=[
-                        {'image_sub_topic_': '/image_out5',
-                         'image_pub_topic_': '/image_out6',}]
-                    ),
-                ComposableNode(
-                    package='isaac_ros_image_proc',
-                    plugin='nvidia::isaac_ros::image_proc::MedianBlurNode',
-                    name='node7',
-                    parameters=[
-                        {'image_sub_topic_': '/image_out6',
-                         'image_pub_topic_': '/image_out7',}]
-                    )
+                # ComposableNode(
+                #     package='isaac_ros_image_proc',
+                #     plugin='nvidia::isaac_ros::image_proc::CvtColorNode',
+                #     name='node6',
+                #     parameters=[
+                #         {'image_sub_topic_': '/image_out5',
+                #          'image_pub_topic_': '/image_out6',}]
+                #     ),
+                # ComposableNode(
+                #     package='isaac_ros_image_proc',
+                #     plugin='nvidia::isaac_ros::image_proc::MedianBlurNode',
+                #     name='node7',
+                #     parameters=[
+                #         {'image_sub_topic_': '/image_out6',
+                #          'image_pub_topic_': '/image_out7',}]
+                #     )
             ],
             output='screen',
     )

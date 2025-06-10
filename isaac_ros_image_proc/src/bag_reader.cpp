@@ -65,7 +65,7 @@ namespace nvidia
                 frame_rate_display_ = 0.0;
 
                 // Create a timer to call the timer_callback function
-                timer_ = this->create_wall_timer(25ms, std::bind(&BagReaderNode::timer_callback, this));
+                timer_ = this->create_wall_timer(20ms, std::bind(&BagReaderNode::timer_callback, this));
             }
 
             void BagReaderNode::timer_callback()
