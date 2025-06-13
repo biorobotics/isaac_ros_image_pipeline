@@ -1,0 +1,42 @@
+bag_reader_node:
+  bag_filename_:
+    type: string
+#     default_value: "/workspaces/isaac_ros-dev/src/rosbag2_2025_02_28-15_52_46/rosbag2_2025_02_28-15_52_46_0.db3"
+    default_value: "/workspaces/isaac_ros-dev/src/rosbag2_image_raw_1280x720/rosbag2_2025_05_14-12_06_14_0.db3"
+#     default_value: "/workspaces/isaac_ros-dev/src/rosbag2_2025_04_29-13_46_01-20250429T174900Z-001/rosbag2_2025_04_29-13_46_01/rosbag2_2025_04_29-13_46_01_0.db3"
+    description: "path of bagfile"
+  pub_image_topic:
+    type: string
+    default_value: "/image_raw"
+    description: "The topic on which the image is published."
+  bag_topic:
+    type: string
+#     default_value: "/camera/color/image_raw"
+#     default_value: "/image_raw"
+    default_value: "/resized_image"
+#     default_value: "/image"
+    description: "The topic from bag being read."
+  resize_factor:
+        type: double
+        default_value: 0.5
+        description: "Resize the image before im show (opencv)"
+  watermark_scale:
+        type: double
+        default_value: 0.7
+        description: "watermark text scale"
+  watermark_thickness:
+        type: int
+        default_value: 1
+        description: "watermark text thickness"
+  watermark_x:
+        type: int
+        default_value: 10
+        description: "watermark text x"
+  watermark_y:
+        type: int
+        default_value: 25
+        description: "watermark text y"
+  bframe_rate_display_:
+    type: bool
+    default_value: true
+    description: "If true, logger will log the frame rate of the callback"

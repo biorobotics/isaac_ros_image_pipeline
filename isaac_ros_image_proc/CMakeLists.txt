@@ -27,11 +27,40 @@ ament_auto_find_build_dependencies()
 
 # Find VPI dependency
 find_package(vpi REQUIRED)
+find_package(OpenCV REQUIRED)
 
 ## Enable CUDA
 #find_package(CUDAToolkit REQUIRED)
 #enable_language(CUDA)
 #
+# opencv median blur node
+generate_parameter_library(
+  opencv_median_blur_parameters # cmake target name for the parameter library
+  config/opencv_median_blur_parameters.yaml # path to input yaml file
+)
+ament_auto_add_library(opencv_median_blur_node SHARED src/opencv_median_blur.cpp)
+rclcpp_components_register_nodes(opencv_median_blur_node "nvidia::isaac_ros::image_proc::OpencvMedianBlurNode")
+set(node_plugins "${node_plugins}nvidia::isaac_ros::image_proc::OpencvMedianBlurNode;$<TARGET_FILE:opencv_median_blur_node>\n")
+target_link_libraries(opencv_median_blur_node opencv_median_blur_parameters ${OpenCV_LIBRARIES})
+set_target_properties(opencv_median_blur_node PROPERTIES
+  BUILD_WITH_INSTALL_RPATH TRUE
+  BUILD_RPATH_USE_ORIGIN TRUE
+  INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+# bag reader node
+generate_parameter_library(
+  bag_reader_parameters # cmake target name for the parameter library
+  config/bag_reader_parameters.yaml # path to input yaml file
+)
+ament_auto_add_library(bag_reader_node SHARED src/bag_reader.cpp)
+rclcpp_components_register_nodes(bag_reader_node "nvidia::isaac_ros::image_proc::BagReaderNode")
+set(node_plugins "${node_plugins}nvidia::isaac_ros::image_proc::BagReaderNode;$<TARGET_FILE:bag_reader_node>\n")
+target_link_libraries(bag_reader_node bag_reader_parameters ${OpenCV_LIBRARIES})
+set_target_properties(bag_reader_node PROPERTIES
+  BUILD_WITH_INSTALL_RPATH TRUE
+  BUILD_RPATH_USE_ORIGIN TRUE
+  INSTALL_RPATH_USE_LINK_PATH TRUE)
+
 # alpha blend node
 ament_auto_add_library(alpha_blend_node SHARED src/alpha_blend_node.cpp src/alpha_blend.cu.cpp)
 rclcpp_components_register_nodes(alpha_blend_node "nvidia::isaac_ros::image_proc::AlphaBlendNode")
