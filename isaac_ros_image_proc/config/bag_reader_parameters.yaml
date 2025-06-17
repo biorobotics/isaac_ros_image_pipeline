@@ -36,3 +36,7 @@ bag_reader_node:
     type: bool
     default_value: true
     description: "If true, logger will log the frame rate of the callback"
+  bimage_display_:
+    type: bool
+    default_value: true
+    description: "If true, will display the image in a window"

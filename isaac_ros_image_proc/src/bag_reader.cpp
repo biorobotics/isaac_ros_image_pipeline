@@ -65,7 +65,7 @@ namespace nvidia
                 frame_rate_display_ = 0.0;
 
                 // Create a timer to call the timer_callback function
-                timer_ = this->create_wall_timer(25ms, std::bind(&BagReaderNode::timer_callback, this));
+                timer_ = this->create_wall_timer(20ms, std::bind(&BagReaderNode::timer_callback, this));
             }
 
             void BagReaderNode::timer_callback()
@@ -108,6 +108,7 @@ namespace nvidia
 
                 nitros_pub_ptr_->publish(nitros_image);
 
+                // Print the frame rate if required
                 if (params_.bframe_rate_display_)
                 {
                     // calculating frame rate
@@ -126,29 +127,24 @@ namespace nvidia
                     }
                     last_time = current_time;
                     // end of frame rate calculation
-
-                    // rclcpp::Time current_time = this->now();
-                    // static rclcpp::Time last_time_ = this->now();
-                    // double frame_rate = 1.0 / (current_time - last_time_).seconds();
-                    // RCLCPP_INFO(this->get_logger(), "Published image %zu at Frame rate: %.2f Hz", image_index_, frame_rate);
-                    // last_time_ = current_time;
-
-                    // Convert to OpenCV Mat
+                }
+                // Display the image if required
+                if (params_.bimage_display_)
+                {
                     cv::Mat image(image_msg.height, image_msg.width, CV_8UC3, image_msg.data.data());
-                    // Show image
                     cv::Mat resized_image;
                     cv::resize(image, resized_image, cv::Size(), params_.resize_factor, params_.resize_factor);
 
-                    // Watermark framerate text
-                    std::string text = cv::format("FPS: %.2f", frame_rate_display_);
-                    int font = cv::FONT_HERSHEY_SIMPLEX;
-                    cv::Point origin(params_.watermark_x, params_.watermark_y);
-                    cv::putText(resized_image, text, origin, font, params_.watermark_scale, CV_RGB(124, 252, 0), params_.watermark_thickness);
+                    if (params_.bframe_rate_display_)
+                    {
+                        std::string text = cv::format("FPS: %.2f", frame_rate_display_);
+                        int font = cv::FONT_HERSHEY_SIMPLEX;
+                        cv::Point origin(params_.watermark_x, params_.watermark_y);
+                        cv::putText(resized_image, text, origin, font, params_.watermark_scale, CV_RGB(124, 252, 0), params_.watermark_thickness);
+                    }
 
                     cv::imshow("Image Viewer", resized_image);
                     cv::waitKey(1);
-
-                    image_index_++;
                 }
             }
         } // namespace image_proc
