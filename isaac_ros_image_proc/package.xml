@@ -47,6 +47,7 @@ SPDX-License-Identifier: Apache-2.0
   <depend>isaac_ros_managed_nitros</depend>
   <depend>message_filters</depend>
   <depend>generate_parameter_library</depend>
+  <depend>rosbag2_transport</depend>
 
   <build_depend>isaac_ros_common</build_depend>
   <build_depend>gxf_isaac_gems</build_depend>
