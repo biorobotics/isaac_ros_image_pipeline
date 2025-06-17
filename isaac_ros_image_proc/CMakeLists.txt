@@ -60,6 +60,20 @@ set_target_properties(bag_reader_node PROPERTIES
   BUILD_WITH_INSTALL_RPATH TRUE
   BUILD_RPATH_USE_ORIGIN TRUE
   INSTALL_RPATH_USE_LINK_PATH TRUE)
+  
+# cvt color node
+generate_parameter_library(
+  cvt_color_parameters # cmake target name for the parameter library
+  config/cvt_color_parameters.yaml # path to input yaml file
+)
+ament_auto_add_library(cvt_color_node SHARED src/cvt_color.cpp)
+rclcpp_components_register_nodes(cvt_color_node "nvidia::isaac_ros::image_proc::CvtColorNode")
+set(node_plugins "${node_plugins}nvidia::isaac_ros::image_proc::CvtColorNode;$<TARGET_FILE:cvt_color_node>\n")
+target_link_libraries(cvt_color_node cvcuda nvcv_types cvt_color_parameters ${OpenCV_LIBRARIES})
+set_target_properties(cvt_color_node PROPERTIES
+  BUILD_WITH_INSTALL_RPATH TRUE
+  BUILD_RPATH_USE_ORIGIN TRUE
+  INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 # masking node
 generate_parameter_library(
@@ -74,7 +88,6 @@ set_target_properties(masking_node PROPERTIES
   BUILD_WITH_INSTALL_RPATH TRUE
   BUILD_RPATH_USE_ORIGIN TRUE
   INSTALL_RPATH_USE_LINK_PATH TRUE)
-
 
 # alpha blend node
 ament_auto_add_library(alpha_blend_node SHARED src/alpha_blend_node.cpp src/alpha_blend.cu.cpp)
