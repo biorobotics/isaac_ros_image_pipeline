@@ -27,6 +27,7 @@ ament_auto_find_build_dependencies()
 
 # Find VPI dependency
 find_package(vpi REQUIRED)
+find_package(OpenCV REQUIRED)
 
 ## Enable CUDA
 #find_package(CUDAToolkit REQUIRED)
@@ -40,7 +41,7 @@ generate_parameter_library(
 ament_auto_add_library(median_blur_node SHARED src/median_blur.cpp)
 rclcpp_components_register_nodes(median_blur_node "nvidia::isaac_ros::image_proc::MedianBlurNode")
 set(node_plugins "${node_plugins}nvidia::isaac_ros::image_proc::MedianBlurNode;$<TARGET_FILE:median_blur_node>\n")
-target_link_libraries(median_blur_node cvcuda nvcv_types median_blur_parameters)
+target_link_libraries(median_blur_node cvcuda nvcv_types median_blur_parameters ${OpenCV_LIBRARIES})
 set_target_properties(median_blur_node PROPERTIES
   BUILD_WITH_INSTALL_RPATH TRUE
   BUILD_RPATH_USE_ORIGIN TRUE

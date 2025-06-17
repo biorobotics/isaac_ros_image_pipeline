@@ -8,13 +8,14 @@
 
 #include <nvcv/Size.hpp>
 
+#include <opencv2/opencv.hpp>
+
 namespace nvidia
 {
     namespace isaac_ros
     {
         namespace image_proc
         {
-
             namespace
             {
 
@@ -32,7 +33,8 @@ namespace nvidia
 
             MedianBlurNode::MedianBlurNode(const rclcpp::NodeOptions options)
                 : Node("median_blur_node", options),
-                  median_blur_op_(max_var_shape_batch_size_) // Initialize MedianBlur operator using the constant
+                  median_blur_op_(max_var_shape_batch_size_), // Initialize MedianBlur operator using the constant
+                  frame_rate_display_(0.0)
             {
                 // Initialize params from generate parameter library
                 param_listener_ = std::make_shared<median_blur_node::ParamListener>(this->get_node_parameters_interface());
@@ -136,6 +138,7 @@ namespace nvidia
 
                 nitros_pub_ptr_->publish(output_image_msg_);
 
+                // Print the frame rate if required
                 if (params_.bframe_rate_display_)
                 {
                     // calculating frame rate
@@ -148,11 +151,43 @@ namespace nvidia
                     if (count == 5)
                     {
                         RCLCPP_INFO(this->get_logger(), "average frame rate: %f", 1 / (total_time / count));
+                        frame_rate_display_ = 1 / (total_time / count);
                         count = 0;
                         total_time = 0;
                     }
                     last_time = current_time;
                     // end of frame rate calculation
+                }
+                // Display the image if required
+                if (params_.bimage_display_)
+                {
+                    sensor_msgs::msg::Image img_msg;
+                    img_msg.header.frame_id = view.GetFrameId();
+                    img_msg.header.stamp.sec = view.GetTimestampSeconds();
+                    img_msg.header.stamp.nanosec = view.GetTimestampNanoseconds();
+                    img_msg.height = output_image_height_;
+                    img_msg.width = output_image_width_;
+                    img_msg.encoding = sensor_msgs::image_encodings::BGR8;
+                    img_msg.step = output_image_buffer_size_ / output_image_height_;
+
+                    img_msg.data.resize(output_image_buffer_size_);
+                    cudaError_t cuda_status = cudaMemcpy(img_msg.data.data(), output_image_buffer_.basePtr, output_image_buffer_size_, cudaMemcpyDefault);
+                    CheckCudaErrors(cuda_status, __FILE__, __LINE__);
+
+                    cv::Mat image(output_image_height_, output_image_width_, CV_8UC3, img_msg.data.data());
+                    cv::Mat resized_image;
+                    cv::resize(image, resized_image, cv::Size(), params_.resize_factor, params_.resize_factor);
+
+                    if (params_.bframe_rate_display_)
+                    {
+                        std::string text = cv::format("FPS: %.2f", frame_rate_display_);
+                        int font = cv::FONT_HERSHEY_SIMPLEX;
+                        cv::Point origin(params_.watermark_x, params_.watermark_y);
+                        cv::putText(resized_image, text, origin, font, params_.watermark_scale, CV_RGB(220, 20, 60), params_.watermark_thickness);
+                    }
+
+                    cv::imshow("Image Viewer 2", resized_image);
+                    cv::waitKey(1);
                 }
             }
 
