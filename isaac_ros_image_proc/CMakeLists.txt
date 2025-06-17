@@ -27,11 +27,27 @@ ament_auto_find_build_dependencies()
 
 # Find VPI dependency
 find_package(vpi REQUIRED)
+find_package(OpenCV REQUIRED)
 
 ## Enable CUDA
 #find_package(CUDAToolkit REQUIRED)
 #enable_language(CUDA)
 #
+# masking node
+generate_parameter_library(
+  masking_parameters # cmake target name for the parameter library
+  config/masking_parameters.yaml # path to input yaml file
+)
+ament_auto_add_library(masking_node SHARED src/masking.cpp)
+rclcpp_components_register_nodes(masking_node "nvidia::isaac_ros::image_proc::MaskingNode")
+set(node_plugins "${node_plugins}nvidia::isaac_ros::image_proc::MaskingNode;$<TARGET_FILE:masking_node>\n")
+target_link_libraries(masking_node masking_parameters ${OpenCV_LIBRARIES})
+set_target_properties(masking_node PROPERTIES
+  BUILD_WITH_INSTALL_RPATH TRUE
+  BUILD_RPATH_USE_ORIGIN TRUE
+  INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+
 # alpha blend node
 ament_auto_add_library(alpha_blend_node SHARED src/alpha_blend_node.cpp src/alpha_blend.cu.cpp)
 rclcpp_components_register_nodes(alpha_blend_node "nvidia::isaac_ros::image_proc::AlphaBlendNode")
