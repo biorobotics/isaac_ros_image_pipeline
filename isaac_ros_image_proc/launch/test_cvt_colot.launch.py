@@ -12,9 +12,9 @@ def generate_launch_description():
             executable='component_container',
             composable_node_descriptions=[
                 ComposableNode(
-                    package='blaser_profilometer',
-                    plugin='blaser::BagReaderNitrosNode',
-                    name='bagreadernitros_node',
+                    package='isaac_ros_image_proc',
+                    plugin='nvidia::isaac_ros::image_proc::BagReaderNode',
+                    name='bag_reader_node',
                     parameters=[
                         {'bag_topic': '/resized_image',
                          'pub_image_topic': '/image_raw',
