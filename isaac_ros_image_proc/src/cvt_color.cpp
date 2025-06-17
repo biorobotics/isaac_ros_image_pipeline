@@ -51,7 +51,7 @@ namespace nvidia
                 CheckCudaErrors(cudaStreamCreate(&stream_), __FILE__, __LINE__);
 
                 // Set image processing parameters. 
-                color_conversion_code_ = NVCV_COLOR_BGR2HSV; // NVCV_COLOR_BGR2HSV_FULL ??? See cvcuda/include/cvcuda/Types.h
+                color_conversion_code_ = NVCV_COLOR_BGR2GRAY; // NVCV_COLOR_BGR2HSV_FULL ??? See cvcuda/include/cvcuda/Types.h
             }
 
             void CvtColorNode::input_callback(const nvidia::isaac_ros::nitros::NitrosImageView &view)
@@ -68,7 +68,7 @@ namespace nvidia
                 const int input_image_channels_ = sensor_msgs::image_encodings::numChannels(view.GetEncoding());
                 const uint32_t output_image_width_ = input_image_width_;
                 const uint32_t output_image_height_ = input_image_height_;
-                const int output_image_channels_ = input_image_channels_;
+                const int output_image_channels_ = 1;
 
                 // Create a buffer for the input image
                 nvcv::TensorDataStridedCuda::Buffer input_image_buffer_;
@@ -106,7 +106,7 @@ namespace nvidia
                 nvcv::Tensor::Requirements output_image_reqs_ = nvcv::Tensor::CalcRequirements(
                     params_.batch_size_,
                     {static_cast<int32_t>(view.GetWidth()), static_cast<int32_t>(view.GetHeight())},
-                    nvcv::FMT_BGR8); // write a function to get the NVCV format from the image encoding TODO
+                    nvcv::FMT_U8); // write a function to get the NVCV format from the image encoding TODO
 
                 nvcv::TensorDataStridedCuda output_image_data_{
                     nvcv::TensorShape{output_image_reqs_.shape, output_image_reqs_.rank, output_image_reqs_.layout},
@@ -129,7 +129,7 @@ namespace nvidia
                     nvidia::isaac_ros::nitros::NitrosImageBuilder()
                         .WithHeader(header_)
                         .WithDimensions(output_image_height_, output_image_width_)
-                        .WithEncoding(sensor_msgs::image_encodings::BGR8)
+                        .WithEncoding(sensor_msgs::image_encodings::MONO8)
                         .WithGpuData(raw_output_image_buffer)
                         .Build();
 
