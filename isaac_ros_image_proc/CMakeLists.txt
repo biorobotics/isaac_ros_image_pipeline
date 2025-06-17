@@ -27,6 +27,7 @@ ament_auto_find_build_dependencies()
 
 # Find VPI dependency
 find_package(vpi REQUIRED)
+find_package(OpenCV REQUIRED)
 
 ## Enable CUDA
 #find_package(CUDAToolkit REQUIRED)
@@ -40,7 +41,7 @@ generate_parameter_library(
 ament_auto_add_library(cvt_color_node SHARED src/cvt_color.cpp)
 rclcpp_components_register_nodes(cvt_color_node "nvidia::isaac_ros::image_proc::CvtColorNode")
 set(node_plugins "${node_plugins}nvidia::isaac_ros::image_proc::CvtColorNode;$<TARGET_FILE:cvt_color_node>\n")
-target_link_libraries(cvt_color_node cvcuda nvcv_types cvt_color_parameters)
+target_link_libraries(cvt_color_node cvcuda nvcv_types cvt_color_parameters ${OpenCV_LIBRARIES})
 set_target_properties(cvt_color_node PROPERTIES
   BUILD_WITH_INSTALL_RPATH TRUE
   BUILD_RPATH_USE_ORIGIN TRUE

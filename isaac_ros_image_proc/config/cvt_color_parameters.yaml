@@ -15,3 +15,27 @@ cvt_color_node:
     type: bool
     default_value: false
     description: "If true, logger will log the frame rate of the callback"
+  bimage_display_:
+    type: bool
+    default_value: false
+    description: "If true, will display the image in a window"
+  resize_factor:
+        type: double
+        default_value: 0.5
+        description: "Resize the image before im show (opencv)"
+  watermark_scale:
+        type: double
+        default_value: 0.7
+        description: "watermark text scale"
+  watermark_thickness:
+        type: int
+        default_value: 1
+        description: "watermark text thickness"
+  watermark_x:
+        type: int
+        default_value: 10
+        description: "watermark text x"
+  watermark_y:
+        type: int
+        default_value: 25
+        description: "watermark text y"

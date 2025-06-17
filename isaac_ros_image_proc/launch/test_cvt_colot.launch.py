@@ -14,7 +14,11 @@ def generate_launch_description():
                 ComposableNode(
                     package='blaser_profilometer',
                     plugin='blaser::BagReaderNitrosNode',
-                    name='bagreadernitros_node'
+                    name='bagreadernitros_node',
+                    parameters=[
+                        {'bag_topic': '/resized_image',
+                         'pub_image_topic': '/image_raw',
+                         'bag_filename_': '/workspaces/isaac_ros-dev/src/rosbag2_image_raw_1280x720/rosbag2_2025_05_14-12_06_14_0.db3',}]
                     ),
                 ComposableNode(
                     package='isaac_ros_image_proc',

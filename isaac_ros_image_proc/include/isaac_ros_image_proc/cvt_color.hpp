@@ -52,6 +52,8 @@ namespace nvidia
 
                 // CUDA stream
                 cudaStream_t stream_;
+
+                double frame_rate_display_;
             };
 
         } // namespace image_proc
