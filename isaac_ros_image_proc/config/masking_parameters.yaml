@@ -1,0 +1,65 @@
+masking_node:
+  batch_size_:
+    type: int
+    default_value: 1
+    description: "The default batch size of images"
+  image_sub_topic_:
+    type: string
+    default_value: "/image_raw"
+    description: "The topic on which the image is subscribed."
+  image_pub_topic_:
+    type: string
+    default_value: "/median_blurred_image"
+    description: "The topic on which the image is subscribed."
+  bframe_rate_display_:
+    type: bool
+    default_value: false
+    description: "If true, logger will log the frame rate of the callback"
+  bimage_display_:
+    type: bool
+    default_value: false
+    description: "If true, will display the image in a window"
+  resize_factor:
+        type: double
+        default_value: 0.5
+        description: "Resize the image before im show (opencv)"
+  watermark_scale:
+        type: double
+        default_value: 0.7
+        description: "watermark text scale"
+  watermark_thickness:
+        type: int
+        default_value: 1
+        description: "watermark text thickness"
+  watermark_x:
+        type: int
+        default_value: 10
+        description: "watermark text x"
+  watermark_y:
+        type: int
+        default_value: 25
+        description: "watermark text y"
+  hue_min:
+    type: int
+    default_value: 120
+    description: "The minimum hue value for the laser line."
+  hue_max:
+    type: int
+    default_value: 130
+    description: "The maximum hue value for the laser line."
+  sat_min:
+    type: int
+    default_value: 0
+    description: "The minimum saturation value for the laser line."
+  sat_max:
+    type: int
+    default_value: 180
+    description: "The maximum saturation value for the laser line."
+  val_min:
+    type: int
+    default_value: 50
+    description: "The minimum value value for the laser line."
+  val_max:
+    type: int
+    default_value: 255
+    description: "The maximum value value for the laser line."
