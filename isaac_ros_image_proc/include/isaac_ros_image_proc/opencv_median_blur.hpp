@@ -14,6 +14,7 @@
 #include <opencv2/core/cuda.hpp>
 #include <opencv2/cudaimgproc.hpp>
 #include <opencv2/cudafilters.hpp>
+#include <opencv2/cudaarithm.hpp>
 
 namespace nvidia
 {
@@ -47,6 +48,16 @@ namespace nvidia
                 opencv_median_blur_node::Params params_;
 
                 cv::Ptr<cv::cuda::Filter> median_filter_;
+                cv::Ptr<cv::cuda::Filter> dilate_filter;
+                cv::Ptr<cv::cuda::Filter> close_filter;
+                cv::Mat mask_dilate_kernel;
+                cv::Mat mask_close_kernel;
+
+                // 
+                cv::cuda::GpuMat input_hsv;
+                std::vector<cv::cuda::GpuMat> hsv_channels;
+                cv::cuda::GpuMat blurred_h, blurred_s, blurred_v;
+
                 double frame_rate_display_;
 
                 cudaStream_t stream_;
