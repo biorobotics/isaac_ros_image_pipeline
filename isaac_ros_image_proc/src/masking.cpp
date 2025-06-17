@@ -167,7 +167,7 @@ namespace nvidia
                         std::string text = cv::format("FPS: %.2f", frame_rate_display_);
                         int font = cv::FONT_HERSHEY_SIMPLEX;
                         cv::Point origin(params_.watermark_x, params_.watermark_y);
-                        cv::putText(resized_image, text, origin, font, params_.watermark_scale, CV_RGB(124, 252, 0), params_.watermark_thickness);
+                        cv::putText(resized_image, text, origin, font, params_.watermark_scale, CV_RGB(252, 252, 252), params_.watermark_thickness);
                     }
 
                     cv::imshow("Mask", resized_image);
