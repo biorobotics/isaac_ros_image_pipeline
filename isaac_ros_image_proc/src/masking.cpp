@@ -81,7 +81,7 @@ namespace nvidia
                 CheckCudaErrors(cudaMallocAsync(&raw_output_image_buffer, params_.batch_size_ * output_image_buffer_size_, stream_), __FILE__, __LINE__);
 
                 // Wrap output GPU memory as GpuMat
-                cv::cuda::GpuMat hsv_mask_(params_.batch_size_ * output_image_height_,
+                cv::cuda::GpuMat im_v_(params_.batch_size_ * output_image_height_,
                                            output_image_width_,
                                            CV_8UC1, raw_output_image_buffer);
 
@@ -112,6 +112,13 @@ namespace nvidia
                 // Apply morphology filters
                 dilate_filter->apply(hsv_mask_, hsv_mask_);
                 close_filter->apply(hsv_mask_, hsv_mask_);
+
+
+                // Convert input image to gray scale
+                cv::cuda::cvtColor(input_image_, im_gray_, cv::COLOR_BGR2GRAY);
+                im_gray_.copyTo(im_mid_, hsv_mask_);
+                // apply threshold to get binary mask
+                cv::cuda::threshold(im_mid_, im_v_, params_.min_intensity, 255, cv::THRESH_TOZERO);
 
                 CheckCudaErrors(cudaStreamSynchronize(stream_), __FILE__, __LINE__); // Is this needed?
 
@@ -156,11 +163,11 @@ namespace nvidia
                 if (params_.bimage_display_)
                 {
                     // Use opencv to view the mask
-                    cv::Mat mask_cpu;
-                    hsv_mask_.download(mask_cpu);
+                    cv::Mat v_cpu;
+                    im_v_.download(v_cpu);
 
                     cv::Mat resized_image;
-                    cv::resize(mask_cpu, resized_image, cv::Size(), params_.resize_factor, params_.resize_factor);
+                    cv::resize(v_cpu, resized_image, cv::Size(), params_.resize_factor, params_.resize_factor);
 
                     if (params_.bframe_rate_display_)
                     {

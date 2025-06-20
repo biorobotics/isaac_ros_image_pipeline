@@ -63,3 +63,7 @@ masking_node:
     type: int
     default_value: 255
     description: "The maximum value value for the laser line."
+  min_intensity:
+    type: int
+    default_value: 50
+    description: "Grey scale intensity threshold"

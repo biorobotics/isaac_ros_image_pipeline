@@ -49,9 +49,12 @@ namespace nvidia
 
                 // CUDA-related variables
                 cv::cuda::GpuMat input_hsv_;
-                // cv::cuda::GpuMat hsv_mask_;
+                cv::cuda::GpuMat hsv_mask_;
                 cv::cuda::GpuMat mask1_;
                 cv::cuda::GpuMat mask2_;
+                cv::cuda::GpuMat im_gray_;
+                cv::cuda::GpuMat im_v_;
+                cv::cuda::GpuMat im_mid_;
 
                 // Morphology filters
                 cv::Ptr<cv::cuda::Filter> dilate_filter;
