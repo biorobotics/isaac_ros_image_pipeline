@@ -1,4 +1,4 @@
-#include "isaac_ros_image_proc/laseer_points.hpp"
+#include "isaac_ros_image_proc/laser_points.hpp"
 
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/image.hpp"
