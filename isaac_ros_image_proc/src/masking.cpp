@@ -116,8 +116,9 @@ namespace nvidia
 
                 // Convert input image to gray scale
                 cv::cuda::cvtColor(input_image_, im_gray_, cv::COLOR_BGR2GRAY);
+                cv::cuda::GpuMat im_mid_;
                 im_gray_.copyTo(im_mid_, hsv_mask_);
-                // apply threshold to get binary mask
+                // apply threshold to get mask
                 cv::cuda::threshold(im_mid_, im_v_, params_.min_intensity, 255, cv::THRESH_TOZERO);
 
                 CheckCudaErrors(cudaStreamSynchronize(stream_), __FILE__, __LINE__); // Is this needed?

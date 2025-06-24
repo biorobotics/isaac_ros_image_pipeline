@@ -53,8 +53,8 @@ namespace nvidia
                 cv::cuda::GpuMat mask1_;
                 cv::cuda::GpuMat mask2_;
                 cv::cuda::GpuMat im_gray_;
-                cv::cuda::GpuMat im_v_;
-                cv::cuda::GpuMat im_mid_;
+                // cv::cuda::GpuMat im_v_;
+                // cv::cuda::GpuMat im_mid_;
 
                 // Morphology filters
                 cv::Ptr<cv::cuda::Filter> dilate_filter;
