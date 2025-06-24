@@ -33,7 +33,7 @@ find_package(PCL REQUIRED COMPONENTS common io)
 find_package(Eigen3 REQUIRED)
 
 ## Enable CUDA
-#find_package(CUDAToolkit REQUIRED)
+find_package(CUDAToolkit REQUIRED)
 #enable_language(CUDA)
 #
 # Median blur node
@@ -91,6 +91,27 @@ set_target_properties(masking_node PROPERTIES
   BUILD_WITH_INSTALL_RPATH TRUE
   BUILD_RPATH_USE_ORIGIN TRUE
   INSTALL_RPATH_USE_LINK_PATH TRUE)
+# Detect Laser Node (CUDA kernel)
+# -------------------------
+generate_parameter_library(
+  detect_laser_parameters # cmake target name for the parameter library
+  config/detect_laser_parameters.yaml # path to input yaml file
+)
+ament_auto_add_library(detect_laser_node SHARED src/detect_laser.cpp src/detect_stripe_kernel.cu)
+rclcpp_components_register_nodes(detect_laser_node "nvidia::isaac_ros::image_proc::DetectLaserNode")
+set(node_plugins "${node_plugins}nvidia::isaac_ros::image_proc::DetectLaserNode;$<TARGET_FILE:detect_laser_node>\n")
+# Mark the custom kernel as CUDA
+set_source_files_properties(
+  src/detect_stripe_kernel.cu
+  PROPERTIES LANGUAGE CUDA
+)
+target_link_libraries(detect_laser_node detect_laser_parameters  ${OpenCV_LIBRARIES}  ${PCL_LIBRARIES}  CUDA::cudart)
+set_target_properties(detect_laser_node PROPERTIES
+  BUILD_WITH_INSTALL_RPATH TRUE
+  BUILD_RPATH_USE_ORIGIN TRUE
+  INSTALL_RPATH_USE_LINK_PATH TRUE
+)
+
 
 # laser points node
 generate_parameter_library(
