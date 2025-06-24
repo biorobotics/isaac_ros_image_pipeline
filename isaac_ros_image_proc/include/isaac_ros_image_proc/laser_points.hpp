@@ -16,6 +16,11 @@
 #include <opencv2/cudafilters.hpp>
 #include <opencv2/cudaarithm.hpp>
 
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
+
+#include <Eigen/Dense>
+
 namespace nvidia
 {
     namespace isaac_ros
@@ -30,6 +35,8 @@ namespace nvidia
 
             private:
                 void input_callback(const nvidia::isaac_ros::nitros::NitrosImageView &view);
+                void pts_norm_to_3d(const std::vector<cv::Point2f> &pts_norm,
+                                    pcl::PointCloud<pcl::PointXYZ>::Ptr pts_3d);
 
                 // Qos???
 
@@ -50,6 +57,14 @@ namespace nvidia
                 // CUDA-related variables
 
                 double frame_rate_display_;
+
+                std::vector<cv::Point2f> laser_points_;
+                cv::Rect laser_roi_;
+
+                // Camera model and laser plane
+                Eigen::Vector4d plane_;
+                cv::Mat camera_matrix_;
+                cv::Mat dist_coeffs_;
 
                 cudaStream_t stream_;
             };

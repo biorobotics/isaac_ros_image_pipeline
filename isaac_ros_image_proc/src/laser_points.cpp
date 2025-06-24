@@ -6,6 +6,8 @@
 
 #include "isaac_ros_nitros_image_type/nitros_image_builder.hpp"
 
+#include <vector>
+
 namespace nvidia
 {
     namespace isaac_ros
@@ -47,6 +49,17 @@ namespace nvidia
                     this, params_.image_pub_topic_,
                     nvidia::isaac_ros::nitros::nitros_image_bgr8_t::supported_type_name); // diagnostics config and qos TODO
 
+                laser_roi_ = cv::Rect(0, 0, 1280, 720); // Example ROI, adjust as needed
+
+                // Camera intrinsics
+                camera_matrix_ = (cv::Mat_<double>(3, 3) << params_.camera_fx, 0, params_.camera_cx, 0,
+                                  params_.camera_fy, params_.camera_cy, 0, 0, 1);
+                dist_coeffs_ = (cv::Mat_<double>(1, 5) << params_.camera_k1, params_.camera_k2, params_.camera_p1,
+                                params_.camera_p2, params_.camera_k3);
+
+                plane_ = Eigen::Vector4d(params_.laser_plane[0], params_.laser_plane[1], params_.laser_plane[2],
+                                         params_.laser_plane[3]);
+
                 CheckCudaErrors(cudaStreamCreate(&stream_), __FILE__, __LINE__);
             }
 
@@ -67,39 +80,87 @@ namespace nvidia
                 const int output_image_channels_ = 1;
 
                 // Wrap input GPU memory as GpuMat
-                cv::cuda::GpuMat input_image_(input_image_height_, input_image_width_, CV_8UC3, const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(view.GetGpuData())));
+                cv::cuda::GpuMat d_im_v(input_image_height_, input_image_width_, CV_8UC1, const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(view.GetGpuData())));
 
-                // Allocate the memory buffer for output ourselves
-                uint8_t *raw_output_image_buffer{nullptr};
-                const size_t output_image_buffer_size_ = output_image_width_ * output_image_height_ * output_image_channels_ * sizeof(uint8_t);
-                CheckCudaErrors(cudaMallocAsync(&raw_output_image_buffer, params_.batch_size_ * output_image_buffer_size_, stream_), __FILE__, __LINE__);
+                laser_points_.clear();
+                laser_points_.reserve(static_cast<size_t>(laser_roi_.width));
 
-                // Wrap output GPU memory as GpuMat
-                cv::cuda::GpuMat im_v_(params_.batch_size_ * output_image_height_,
-                                           output_image_width_,
-                                           CV_8UC1, raw_output_image_buffer);
+                for (int cc = 0; cc < d_im_v.cols; ++cc)
+                {
+                    // grab one column on the device
+                    cv::cuda::GpuMat d_col = d_im_v.col(cc);
 
+                    // compute min/max on GPU
+                    double minVal, maxVal;
+                    cv::Point minLoc, maxLoc;
+                    cv::cuda::minMaxLoc(d_col, &minVal, &maxVal, &minLoc, &maxLoc);
 
+                    // Download that single column for the 80%-threshold & weighted-average steps
+                    cv::Mat colHost;
+                    d_col.download(colHost);
+
+                    // Find the 80%-band around the peak
+                    int j = maxLoc.y - 1;
+                    int k = maxLoc.y + 1;
+                    const auto threshold = 0.8 * maxVal;
+                    while (j >= 0 && colHost.at<uchar>(j, 0) > threshold)
+                        --j;
+                    while (k < colHost.rows && colHost.at<uchar>(k, 0) > threshold)
+                        ++k;
+
+                    // Compute weighted centroid within [j+1, k)
+                    double weightedSum = 0.0, valSum = 0.0;
+                    for (int rr = j + 1; rr < k; ++rr)
+                    {
+                        double v = colHost.at<uchar>(rr, 0);
+                        weightedSum += v * (rr - j);
+                        valSum += v;
+                    }
+
+                    if (valSum > 0.0)
+                    {
+                        float y = static_cast<float>(weightedSum / valSum + j) + laser_roi_.y;
+                        float x = static_cast<float>(cc) + laser_roi_.x;
+                        laser_points_.emplace_back(x, y);
+                    }
+                }
+
+                // Reject too‐small segments
+                if (static_cast<int>(laser_points_.size()) < params_.min_segment_points)
+                {
+                    laser_points_.clear();
+                }
+                if (laser_points_.empty())
+                {
+                    return; // No points found, skip processing
+                }
+
+                std::vector<cv::Point2f> laser_uv_norm;
+                laser_uv_norm.reserve(laser_points_.size());
+                cv::undistortPoints(laser_points_, laser_uv_norm, camera_matrix_, dist_coeffs_);
+                // Generate point cloud
+                auto laser_point_cloud = std::make_shared<pcl::PointCloud<pcl::PointXYZ>>();
+                // Convert normalized points to 3D
+                pts_norm_to_3d(laser_uv_norm, laser_point_cloud);
+
+                // ----------------------------------
                 CheckCudaErrors(cudaStreamSynchronize(stream_), __FILE__, __LINE__); // Is this needed?
 
+                // // Create a NitrosImage message and publish it
+                // std_msgs::msg::Header header_;
+                // header_.frame_id = view.GetFrameId();
+                // header_.stamp.sec = view.GetTimestampSeconds();
+                // header_.stamp.nanosec = view.GetTimestampNanoseconds();
 
+                // nvidia::isaac_ros::nitros::NitrosImage output_image_msg_ =
+                //     nvidia::isaac_ros::nitros::NitrosImageBuilder()
+                //         .WithHeader(header_)
+                //         .WithDimensions(output_image_height_, output_image_width_)
+                //         .WithEncoding(sensor_msgs::image_encodings::MONO8) // Assuming output is single channel
+                //         .WithGpuData(raw_output_image_buffer)
+                //         .Build();
 
-
-                // Create a NitrosImage message and publish it
-                std_msgs::msg::Header header_;
-                header_.frame_id = view.GetFrameId();
-                header_.stamp.sec = view.GetTimestampSeconds();
-                header_.stamp.nanosec = view.GetTimestampNanoseconds();
-
-                nvidia::isaac_ros::nitros::NitrosImage output_image_msg_ =
-                    nvidia::isaac_ros::nitros::NitrosImageBuilder()
-                        .WithHeader(header_)
-                        .WithDimensions(output_image_height_, output_image_width_)
-                        .WithEncoding(sensor_msgs::image_encodings::MONO8) // Assuming output is single channel
-                        .WithGpuData(raw_output_image_buffer)
-                        .Build();
-
-                nitros_pub_ptr_->publish(output_image_msg_);
+                // nitros_pub_ptr_->publish(output_image_msg_);
 
                 // Print the frame rate if required
                 if (params_.bframe_rate_display_)
@@ -143,6 +204,30 @@ namespace nvidia
                 //     cv::imshow("Laser_points", resized_image);
                 //     cv::waitKey(1);
                 // }
+            }
+
+            void LaserPointsNode::pts_norm_to_3d(const std::vector<cv::Point2f> &pts_norm,
+                                                 pcl::PointCloud<pcl::PointXYZ>::Ptr pts_3d)
+            {
+                pts_3d->clear();
+                pts_3d->reserve(pts_norm.size());
+
+                for (const auto &pt : pts_norm)
+                {
+                    double x = pt.x;
+                    double y = pt.y;
+                    double denom = x * plane_(0) + y * plane_(1) + plane_(2);
+                    if (std::abs(denom) > 1e-9)
+                    {
+                        double z = -plane_(3) / denom;
+                        pts_3d->emplace_back(static_cast<float>(x * z), static_cast<float>(y * z),
+                                             static_cast<float>(z));
+                    }
+                }
+
+                pts_3d->width = pts_3d->size();
+                pts_3d->height = 1;
+                pts_3d->is_dense = true;
             }
 
             LaserPointsNode::~LaserPointsNode()
