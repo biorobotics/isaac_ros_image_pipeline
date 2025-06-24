@@ -27,6 +27,7 @@ ament_auto_find_build_dependencies()
 
 # Find VPI dependency
 find_package(vpi REQUIRED)
+find_package(OpenCV REQUIRED)
 
 ## Enable CUDA
 #find_package(CUDAToolkit REQUIRED)

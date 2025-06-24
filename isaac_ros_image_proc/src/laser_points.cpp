@@ -119,8 +119,8 @@ namespace nvidia
                         total_time = 0;
                     }
                     last_time = current_time;
-                //     // end of frame rate calculation
-                // }
+                    // end of frame rate calculation
+                }
 
                 // // Display the image if required
                 // if (params_.bimage_display_)
