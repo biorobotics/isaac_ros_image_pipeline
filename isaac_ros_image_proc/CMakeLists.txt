@@ -32,6 +32,20 @@ find_package(vpi REQUIRED)
 #find_package(CUDAToolkit REQUIRED)
 #enable_language(CUDA)
 #
+# laser points node
+generate_parameter_library(
+  laser_points_parameters # cmake target name for the parameter library
+  config/laser_points_parameters.yaml # path to input yaml file
+)
+ament_auto_add_library(laseer_points_node SHARED src/laseer_points.cpp)
+rclcpp_components_register_nodes(laseer_points_node "nvidia::isaac_ros::image_proc::LaserPointsNode")
+set(node_plugins "${node_plugins}nvidia::isaac_ros::image_proc::LaserPointsNode;$<TARGET_FILE:laseer_points_node>\n")
+target_link_libraries(laseer_points_node laser_points_parameters ${OpenCV_LIBRARIES})
+set_target_properties(laseer_points_node PROPERTIES
+  BUILD_WITH_INSTALL_RPATH TRUE
+  BUILD_RPATH_USE_ORIGIN TRUE
+  INSTALL_RPATH_USE_LINK_PATH TRUE)
+
 # alpha blend node
 ament_auto_add_library(alpha_blend_node SHARED src/alpha_blend_node.cpp src/alpha_blend.cu.cpp)
 rclcpp_components_register_nodes(alpha_blend_node "nvidia::isaac_ros::image_proc::AlphaBlendNode")
