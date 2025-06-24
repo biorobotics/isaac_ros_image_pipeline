@@ -28,6 +28,9 @@ ament_auto_find_build_dependencies()
 # Find VPI dependency
 find_package(vpi REQUIRED)
 find_package(OpenCV REQUIRED)
+find_package(pcl_conversions REQUIRED)
+find_package(PCL REQUIRED COMPONENTS common io)
+find_package(Eigen3 REQUIRED)
 
 ## Enable CUDA
 #find_package(CUDAToolkit REQUIRED)
@@ -85,6 +88,20 @@ rclcpp_components_register_nodes(masking_node "nvidia::isaac_ros::image_proc::Ma
 set(node_plugins "${node_plugins}nvidia::isaac_ros::image_proc::MaskingNode;$<TARGET_FILE:masking_node>\n")
 target_link_libraries(masking_node masking_parameters ${OpenCV_LIBRARIES})
 set_target_properties(masking_node PROPERTIES
+  BUILD_WITH_INSTALL_RPATH TRUE
+  BUILD_RPATH_USE_ORIGIN TRUE
+  INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+# laser points node
+generate_parameter_library(
+  laser_points_parameters # cmake target name for the parameter library
+  config/laser_points_parameters.yaml # path to input yaml file
+)
+ament_auto_add_library(laser_points_node SHARED src/laser_points.cpp)
+rclcpp_components_register_nodes(laser_points_node "nvidia::isaac_ros::image_proc::LaserPointsNode")
+set(node_plugins "${node_plugins}nvidia::isaac_ros::image_proc::LaserPointsNode;$<TARGET_FILE:laser_points_node>\n")
+target_link_libraries(laser_points_node laser_points_parameters ${OpenCV_LIBRARIES} ${PCL_LIBRARIES})
+set_target_properties(laser_points_node PROPERTIES
   BUILD_WITH_INSTALL_RPATH TRUE
   BUILD_RPATH_USE_ORIGIN TRUE
   INSTALL_RPATH_USE_LINK_PATH TRUE)

@@ -1,0 +1,85 @@
+laser_points_node:
+  batch_size_:
+    type: int
+    default_value: 1
+    description: "The default batch size of images"
+  image_sub_topic_:
+    type: string
+    default_value: "/image_raw"
+    description: "The topic on which the image is subscribed."
+  image_pub_topic_:
+    type: string
+    default_value: "/median_blurred_image"
+    description: "The topic on which the image is subscribed."
+  bframe_rate_display_:
+    type: bool
+    default_value: false
+    description: "If true, logger will log the frame rate of the callback"
+  bimage_display_:
+    type: bool
+    default_value: false
+    description: "If true, will display the image in a window"
+  resize_factor:
+        type: double
+        default_value: 0.5
+        description: "Resize the image before im show (opencv)"
+  watermark_scale:
+        type: double
+        default_value: 0.7
+        description: "watermark text scale"
+  watermark_thickness:
+        type: int
+        default_value: 1
+        description: "watermark text thickness"
+  watermark_x:
+        type: int
+        default_value: 10
+        description: "watermark text x"
+  watermark_y:
+        type: int
+        default_value: 25
+        description: "watermark text y"
+  camera_fx:
+    type: double
+    default_value: 5.1142219697013597e+03
+    description: "The focal length of the camera in the x-direction."
+  camera_fy:
+    type: double
+    default_value: 5.0983593975836966e+03
+    description: "The focal length of the camera in the y-direction."
+  camera_cx:
+    type: double
+    default_value: 1.2611345136209225e+03
+    description: "The x-coordinate of the principal point of the camera."
+  camera_cy:  
+    type: double
+    default_value: 1.0926811131732388e+03
+    description: "The y-coordinate of the principal point of the camera."
+  camera_k1:
+    type: double
+    default_value: -5.7188002368703417e-02
+    description: "The first radial distortion coefficient of the camera."
+  camera_k2:
+    type: double
+    default_value: -9.1109575465685641e-02
+    description: "The second radial distortion coefficient of the camera."
+  camera_p1:
+    type: double
+    default_value: 2.2207162904847332e-02
+    description: "The first tangential distortion coefficient of the camera."
+  camera_p2:
+    type: double
+    default_value: 7.6981187150339193e-04
+    description: "The second tangential distortion coefficient of the camera."
+  camera_k3:
+    type: double
+    default_value: 0.0
+    description: "The third radial distortion coefficient of the camera."
+  min_segment_points:
+    type: int
+    default_value: 100
+    description: "The minimum number of points in a segment."
+  laser_plane:
+    type: double_array
+    default_value: [   2.95265, -128.346,   -100,        14.9231 ]
+    description: "The coefficients of the plane on which the laser line lies."
