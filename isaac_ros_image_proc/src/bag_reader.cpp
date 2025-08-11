@@ -146,6 +146,8 @@ namespace nvidia
                     cv::imshow("Image Viewer", resized_image);
                     cv::waitKey(1);
                 }
+
+                image_index_++;
             }
         } // namespace image_proc
     } // namespace isaac_ros
