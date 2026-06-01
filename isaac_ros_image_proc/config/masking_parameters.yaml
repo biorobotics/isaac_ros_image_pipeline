@@ -41,11 +41,11 @@ masking_node:
         description: "watermark text y"
   hue_min:
     type: int
-    default_value: 120
+    default_value: 0
     description: "The minimum hue value for the laser line."
   hue_max:
     type: int
-    default_value: 130
+    default_value: 20
     description: "The maximum hue value for the laser line."
   sat_min:
     type: int

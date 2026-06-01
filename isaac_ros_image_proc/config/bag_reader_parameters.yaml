@@ -4,6 +4,14 @@ bag_reader_node:
     default_value: "/workspaces/isaac_ros-dev/src/rosbag2_2025_02_28-15_52_46/rosbag2_2025_02_28-15_52_46_0.db3"
     # default_value: "/workspaces/isaac_ros-dev/src/rosbag2_2025_04_29-13_46_01-20250429T174900Z-001/rosbag2_2025_04_29-13_46_01/rosbag2_2025_04_29-13_46_01_0.db3"
     description: "path of bagfile"
+  tf_bag_filename_:
+    type: string
+    default_value: "/workspaces/isaac_ros-dev/src/rosbag2_2025_02_28-15_52_46/rosbag2_2025_02_28-15_52_46_0.db3"
+    description: "path of tf bagfile"
+  tf_topic:
+    type: string
+    default_value: "/tf"
+    description: "The topic on which the tf is published."
   pub_image_topic:
     type: string
     default_value: "/image_raw"

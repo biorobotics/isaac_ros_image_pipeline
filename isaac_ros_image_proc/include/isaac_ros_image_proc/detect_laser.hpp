@@ -21,6 +21,11 @@
 
 #include <Eigen/Dense>
 
+#include "rclcpp/rclcpp.hpp"
+#include "sensor_msgs/msg/point_cloud2.hpp"
+
+#include "pcl_conversions/pcl_conversions.h"
+
 namespace nvidia
 {
     namespace isaac_ros
@@ -45,10 +50,12 @@ namespace nvidia
                     nvidia::isaac_ros::nitros::NitrosImageView>>
                     nitros_sub_ptr_;
 
-                // Publisher for NitrosImage messages
-                std::shared_ptr<nvidia::isaac_ros::nitros::ManagedNitrosPublisher<
-                    nvidia::isaac_ros::nitros::NitrosImage>>
-                    nitros_pub_ptr_;
+                // // Publisher for NitrosImage messages
+                // std::shared_ptr<nvidia::isaac_ros::nitros::ManagedNitrosPublisher<
+                //     nvidia::isaac_ros::nitros::NitrosImage>>
+                //     nitros_pub_ptr_;
+                
+                rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr cloud_publisher_;
 
                 // Parameters and parameter listener
                 std::shared_ptr<detect_laser_node::ParamListener> param_listener_;

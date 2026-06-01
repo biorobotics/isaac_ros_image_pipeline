@@ -1,6 +1,5 @@
 #include "isaac_ros_image_proc/detect_laser.hpp"
 
-#include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/image.hpp"
 #include "sensor_msgs/image_encodings.hpp"
 
@@ -50,10 +49,12 @@ namespace nvidia
                     std::bind(&DetectLaserNode::input_callback, this, std::placeholders::_1)); // diagnostics config and qos TODO
 
                 // Create a publisher
-                nitros_pub_ptr_ = std::make_shared<nvidia::isaac_ros::nitros::ManagedNitrosPublisher<
-                    nvidia::isaac_ros::nitros::NitrosImage>>(
-                    this, params_.image_pub_topic_,
-                    nvidia::isaac_ros::nitros::nitros_image_bgr8_t::supported_type_name); // diagnostics config and qos TODO
+                // nitros_pub_ptr_ = std::make_shared<nvidia::isaac_ros::nitros::ManagedNitrosPublisher<
+                //     nvidia::isaac_ros::nitros::NitrosImage>>(
+                //     this, params_.image_pub_topic_,
+                //     nvidia::isaac_ros::nitros::nitros_image_bgr8_t::supported_type_name); // diagnostics config and qos TODO
+
+                cloud_publisher_ = this->create_publisher<sensor_msgs::msg::PointCloud2>(params_.image_pub_topic_, 10);
 
                 laser_roi_ = cv::Rect(0, 0, 1280, 720); // Example ROI, adjust as needed
 
@@ -101,6 +102,7 @@ namespace nvidia
                 // Launch kernel
                 const int threads = 128;
                 const int blocks = (cols + threads - 1) / threads;
+                // const int blocks  = (rows + threads - 1) / threads;
                 detect_laser_stripe_kernel<<<blocks, threads, 0, stream_>>>(
                     d_im_v.ptr<uchar>(), rows, cols, step,
                     float(laser_roi_.x), float(laser_roi_.y), 0.8f,
@@ -149,6 +151,14 @@ namespace nvidia
                 auto laser_point_cloud = std::make_shared<pcl::PointCloud<pcl::PointXYZ>>();
                 // Convert normalized points to 3D
                 pts_norm_to_3d(laser_uv_norm, laser_point_cloud);
+
+                sensor_msgs::msg::PointCloud2 output;
+                pcl::toROSMsg(*laser_point_cloud, output);
+                output.header.frame_id = "camera_frame";
+                output.header.stamp = this->now();
+                // print the output point cloud size
+                // RCLCPP_INFO(this->get_logger(), "Output point cloud size: %zu", laser_point_cloud->size());
+                cloud_publisher_->publish(output);
 
                 // ----------------------------------
                 CheckCudaErrors(cudaStreamSynchronize(stream_), __FILE__, __LINE__); // Is this needed?

@@ -13,32 +13,45 @@ def generate_launch_description():
             executable='component_container',
             composable_node_descriptions=[
                 ComposableNode(
-                    package='blaser_profilometer',
-                    plugin='blaser::BagReaderNitrosNode',
-                    name='bagreadernitros_node',
+                    package='isaac_ros_image_proc',
+                    plugin='nvidia::isaac_ros::image_proc::BagReaderNode',
+                    name='bag_reader_node',
                     parameters=[
-                        {'bag_topic': '/resized_image',
-                         'pub_image_topic': '/image_raw',
-                         'bag_filename_': '/workspaces/isaac_ros-dev/src/rosbag2_image_raw_1280x720/rosbag2_2025_05_14-12_06_14_0.db3',
+                        {'bag_topic': '/hsv_mask',
+                         'pub_image_topic': '/hsv_mask',
+                         'bag_filename_': '/workspaces/isaac_ros-dev/src/rosbag2_hsv_mask_1280x720/rosbag2_2025_08_11-13_45_51_0.db3',
                          'bframe_rate_display_': True,
                          'bimage_display_': True,}]
-                    ),
+                ), 
+                # ComposableNode(
+                #     package='ximea_camera_driver',
+                #     plugin='ximea_camera_driver::CameraNode',
+                #     name='ximea_camera_driver'
+                #     ),
+                # ComposableNode(
+                #     package='isaac_ros_image_proc',
+                #     plugin='nvidia::isaac_ros::image_proc::MedianBlurNode',
+                #     name='median_blur_node',
+                #     parameters=[
+                #         {'image_sub_topic_': '/image_raw',
+                #          'image_pub_topic_': '/image_out1',}]
+                #     ),
+                # ComposableNode(
+                #     package='isaac_ros_image_proc',
+                #     plugin='nvidia::isaac_ros::image_proc::MaskingNode',
+                #     name='masking_node',
+                #     parameters=[
+                #         {'image_sub_topic_': '/image_out1',
+                #          'image_pub_topic_': '/image_out2',}]
+                #     ),
                 ComposableNode(
                     package='isaac_ros_image_proc',
-                    plugin='nvidia::isaac_ros::image_proc::MedianBlurNode',
-                    name='median_blur_node',
+                    plugin='nvidia::isaac_ros::image_proc::DetectLaserNode',
+                    name='detect_laser_node',
                     parameters=[
-                        {'image_sub_topic_': '/image_raw',
-                         'image_pub_topic_': '/image_out1',}]
-                    ),
-                ComposableNode(
-                    package='isaac_ros_image_proc',
-                    plugin='nvidia::isaac_ros::image_proc::MaskingNode',
-                    name='masking_node',
-                    parameters=[
-                        {'image_sub_topic_': '/image_out1',
-                         'image_pub_topic_': '/image_out2',}]
-                    ),
+                        {'image_sub_topic_': '/hsv_mask',
+                         'image_pub_topic_': '/image_out3',}]
+                    )
                 # ComposableNode(
                 #     package='isaac_ros_image_proc',
                 #     plugin='nvidia::isaac_ros::image_proc::CvtColorNode',

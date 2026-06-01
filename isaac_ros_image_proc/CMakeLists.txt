@@ -102,6 +102,7 @@ rclcpp_components_register_nodes(detect_laser_node "nvidia::isaac_ros::image_pro
 set(node_plugins "${node_plugins}nvidia::isaac_ros::image_proc::DetectLaserNode;$<TARGET_FILE:detect_laser_node>\n")
 # Mark the custom kernel as CUDA
 set_source_files_properties(
+  src/detect_laser.cpp
   src/detect_stripe_kernel.cu
   PROPERTIES LANGUAGE CUDA
 )

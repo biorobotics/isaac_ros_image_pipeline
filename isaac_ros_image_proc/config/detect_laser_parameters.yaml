@@ -41,35 +41,35 @@ detect_laser_node:
         description: "watermark text y"
   camera_fx:
     type: double
-    default_value: 5.1142219697013597e+03
+    default_value: 1146.86
     description: "The focal length of the camera in the x-direction."
   camera_fy:
     type: double
-    default_value: 5.0983593975836966e+03
+    default_value: 1141.58
     description: "The focal length of the camera in the y-direction."
   camera_cx:
     type: double
-    default_value: 1.2611345136209225e+03
+    default_value: 613.152
     description: "The x-coordinate of the principal point of the camera."
   camera_cy:  
     type: double
-    default_value: 1.0926811131732388e+03
+    default_value: 499.75
     description: "The y-coordinate of the principal point of the camera."
   camera_k1:
     type: double
-    default_value: -5.7188002368703417e-02
+    default_value: 0.112546
     description: "The first radial distortion coefficient of the camera."
   camera_k2:
     type: double
-    default_value: -9.1109575465685641e-02
+    default_value: -0.0915681
     description: "The second radial distortion coefficient of the camera."
   camera_p1:
     type: double
-    default_value: 2.2207162904847332e-02
+    default_value: -0.00338411
     description: "The first tangential distortion coefficient of the camera."
   camera_p2:
     type: double
-    default_value: 7.6981187150339193e-04
+    default_value: -0.00583579
     description: "The second tangential distortion coefficient of the camera."
   camera_k3:
     type: double
@@ -81,5 +81,5 @@ detect_laser_node:
     description: "The minimum number of points in a segment."
   laser_plane:
     type: double_array
-    default_value: [   2.95265, -128.346,   -100,        14.9231 ]
+    default_value: [326.8, 11.214,  -100.0, 11.512]
     description: "The coefficients of the plane on which the laser line lies."
